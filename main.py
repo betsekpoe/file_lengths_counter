@@ -23,12 +23,7 @@ class File:
         return len(self.content) if include_spaces else len(sub(r"\s+", "", self.content))
 
     def line_count(self):
-        line_count = 0
-        for character in self.content:
-           if character == "\n":
-               line_count += 1
-        line_count += 1
-        return line_count
+        return len(self.content.splitlines())
 
     def word_count(self):
          return len(self.content.split()) #splits everything seperated by a white space into its own element in an array
