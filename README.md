@@ -1,6 +1,4 @@
-# file_lengths_counter with python
-
-# 🗃️ File Analyzer & Logger in Python
+# 🗃️ File "Lengths" Analyzer & Logger in Python
 
 This is a command-line Python application that lets users load and analyze multiple text files. It offers functionality such as counting characters, words, lines, finding occurrences of text, and logging actions to a file.
 
