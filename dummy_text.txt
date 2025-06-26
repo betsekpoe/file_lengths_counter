@@ -171,7 +171,7 @@ Comment
 More info
 
 Advertise with us
-Next Article 
+Next Article
 Python MongoDB Tutorial
 Similar Reads
 Python Tutorial | Learn Python Programming Language
