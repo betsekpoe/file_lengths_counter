@@ -1,4 +1,5 @@
 from re import sub
+import os
 
 class File:
     def __init__(self, file):
@@ -50,15 +51,17 @@ def select_file(files, action="perform this action"):
     print("File not found!")
     return None
 
+file_log_name = "file_log.txt"
 
-def post_to_log(filename, method = "", number = "", word=""):
-    with open("file_log.txt", "a+") as file_log:
-        if method and number and word != "":
-                file_log.write(f"{filename} : {method} - {number}\n")
-        elif word:
-            file_log.write(f"{filename}: {word} count {number}\n")
+def post_to_log(filename, text_to_find, method = "", number = ""):
+    with open(file_log_name, "a+") as log:
+        if text_to_find and method and number:
+                log.write(f"{filename}: {method} '{text_to_find}' - {number}\n")
+        elif method and number:
+            log.write(f"{filename}: {method} {number}\n")
         else:
-            file_log.write(f"{filename} was created\n")
+            log.write(f"{filename} was created\n")
+
 
 def file_menu():
     files = {}
@@ -73,27 +76,26 @@ def file_menu():
               "6. Find text occurrences\n"
               "7. View log\n"
               "8. Delete log file\n"
-              "9. Exit\n")
-        menu_selection = input("Choose an option (1 - 8): ")
+              "9. View File\n"
+              "10. Exit\n")
+        menu_selection = input("Choose an option (1 - 10): ")
         print()
 
-        while menu_selection == "1":
+        if menu_selection == "1":
             print("Load file\n"
                   "Type 0 to return to context menu")
             filename = input("Enter a file name (eg: logs.txt): ")
-
+            if filename == "0":
+                continue
             file_obj = File(filename)
-
             if file_obj.success:
                 files[filename] = file_obj
                 print(f"File {filename} added successfully.\n")
-                post_to_log(filename)
-            elif filename == "0":
-                menu_selection = "0"
+                post_to_log(filename, "")
             else:
                 print("File not added due to an error.\n")
 
-        if menu_selection == "2":
+        elif menu_selection == "2":
             if not files:
                 print("No files loaded")
             else:
@@ -105,11 +107,11 @@ def file_menu():
             print("View character count")
             filename = select_file(files, "view character count")
             if filename:
-                include_spaces = input("Include spaces in count? y/n: ").lower() == "y"
+                include_spaces = input("Include spaces in count? y/n: ").strip().lower() == "y"
                 caption = "Characters including spaces:" if include_spaces == True else "Characters excluding spaces:"
                 character_count = files[filename].character_count(include_spaces)
                 print(caption, character_count)
-                post_to_log(filename, "character_count", character_count)
+                post_to_log(filename, "", method = "character_count", number = character_count,)
 
         elif menu_selection == "4":
             print("View line count")
@@ -117,7 +119,7 @@ def file_menu():
             if filename:
                 line_count = files[filename].line_count()
                 print(f"{filename} has {line_count} lines")
-                post_to_log(filename, "line count", line_count)
+                post_to_log(filename, "", method = "line count", number = line_count)
 
         elif menu_selection == "5":
             print("View word count")
@@ -125,22 +127,22 @@ def file_menu():
             if filename:
                 word_count = files[filename].word_count()
                 print(f"{filename} has {word_count} words")
-                post_to_log(filename, "word count", word_count)
+                post_to_log(filename, "", method = "word count", number = word_count)
 
         elif menu_selection == "6":
             print("Find text occurrences")
             filename = select_file(files, "find occurrences")
             if filename:
-                text_to_find = input("Type in a word/text: ")
-                case_sensitive = input("Find case sensitive matches y/n: ").lower() == "y"
-                occurrences = files[filename].find_occurrences(text_to_find, case_sensitive)
-                print(f"{text_to_find} appeared {occurrences} times")
-                post_to_log(filename, "found", occurrences, text_to_find)
+                text = input("Type in a word/text: ")
+                case_sensitive = input("Find case sensitive matches y/n: ").strip().lower() == "y"
+                occurrences = files[filename].find_occurrences(text, case_sensitive)
+                print(f"{text} appeared {occurrences} times")
+                post_to_log(filename, text_to_find = text, method = "found", number = occurrences)
 
         elif menu_selection == "7":
             try:
                 print("File Log. File Actions")
-                with open("file_log.txt", "r") as file_log:
+                with open(file_log_name, "r") as file_log:
                     print(file_log.read())
             except FileNotFoundError:
                 print("No logs yet!")
@@ -148,13 +150,27 @@ def file_menu():
         elif menu_selection == "8":
             print("Are you sure you want to delete the log file?\nThis action cannot be undone!")
             confirm_delete = input("y/n: ") == "y"
+            if confirm_delete and os.path.exists(file_log_name):
+                try:
+                    os.remove(file_log_name)
+                    print(f"'{file_log_name}' deleted successfully!")
+                except Exception as e:
+                    print(f"Error deleting file {e}")
+            else:
+                print(f"{file_log_name} does not exist!")
 
         elif menu_selection == "9":
+            filename = select_file(files, "view contents")
+            if filename:
+                print(f"Viewing content of {filename}")
+                print(files[filename].content)
+
+        elif menu_selection == "10":
             print("Exiting...")
             break
 
         else:
-            print("Invalid selection! Choose options 1 - 8")
+            print("Invalid selection! Choose options 1 - 10")
 
 if __name__ == "__main__":
     file_menu()
